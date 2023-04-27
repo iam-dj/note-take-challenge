@@ -1,6 +1,6 @@
 const express = require("express");
 const app = express();
-const fs = require ("fs");
+const fs = require("fs");
 const path = require("path");
 const uuid = require("uuid");
 
@@ -24,39 +24,66 @@ app.get("/", (req, res) => {
 });
 
 app.get("/api/notes", (req, res) => {
-    fs.readFile("./db/db.json", "utf-8", (err, notesData) => {
+  fs.readFile("./db/db.json", "utf-8", (err, notesData) => {
+    if (err) {
+      return res.status(500).json({ msg: "error reading db" });
+    } else {
+      const dataArr = JSON.parse(notesData);
+      return res.json(dataArr);
+    }
+  });
+});
+app.post("/api/notes", (req, res) => {
+  fs.readFile("./db/db.json", "utf-8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ msg: "error reading db" });
+    } else {
+      const dataArr = JSON.parse(data);
+      const newNote = {
+        id: generateRandomNumber(),
+        title: req.body.title,
+        text: req.body.text,
+      };
+      console.log(newNote);
+      dataArr.push(newNote);
+      fs.writeFile("./db/db.json", JSON.stringify(dataArr, null, 4), (err) => {
         if (err) {
-          return res.status(500).json({ msg: "error reading db" });
+          return res.status(500).json({ msg: "error writing db" });
         } else {
-          const dataArr = JSON.parse(notesData);
-          return res.json(dataArr);
+          return res.json(newNote);
         }
       });
+    }
+  });
 });
-app.post('/api/notes', (req,res)=>{
-    fs.readFile("./db/db.json","utf-8",(err,data)=>{
-        if(err){
-            return res.status(500).json({msg:"error reading db"})
-        } else {
-            const dataArr = JSON.parse(data);
-            const newNote = {
-                id:generateRandomNumber(),
-                title:req.body.title,
-                text:req.body.text
-            }
-            console.log(newNote)
-            dataArr.push(newNote)
-           fs.writeFile("./db/db.json",JSON.stringify(dataArr,null,4),(err)=>{
-            if(err){
-                return res.status(500).json({msg:"error writing db"})
-            } else {
-                return res.json(newNote)
-            }
-           })
-        }
-    })
-})
 
-app.listen(PORT, () =>
-  console.log(`Listening at http://localhost:${PORT}`)
-);
+app.delete("/api/notes/:id", (req, res) => {
+    fs.readFile("./db/db.json", "utf-8", (err, data) => {
+      if (err) {
+        return res.status(500).json({ msg: "error reading db" });
+      } else {
+        const notes = JSON.parse(data);
+        const noteID = req.params.id;
+        const noteIndex = notes.findIndex((note) => note.id == noteID);
+        if (noteIndex !== -1) {
+          notes.splice(noteIndex, 1);
+          fs.writeFile("./db/db.json", JSON.stringify(notes), (err) => {
+            if (err) {
+              return res.status(500).json({ msg: "error writing db" });
+            } else {
+              return res.json({
+                msg: "note deleted successfully",
+              });
+            }
+          });
+        } else {
+          return res.status(404).json({
+            msg: "no such note!",
+          });
+        }
+      }
+    });
+  });
+  
+
+app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
