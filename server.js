@@ -2,27 +2,29 @@ const express = require("express");
 const app = express();
 const fs = require ("fs");
 const path = require("path");
-const uuid = require('uuid');
+const uuid = require("uuid");
 
+function generateRandomNumber() {
+  const randomNum = Math.floor(Math.random() * 10000);
+  return randomNum;
+}
 const PORT = process.env.PORT || 3000;
-
 
 app.use(express.static("public"));
 
 app.use(express.urlencoded({ extended: true }));
 app.use(express.json());
 
-app.get("*", (req, res) => {
-  res.sendFile(path.join(__dirname, "./public/index.html"));
-});
 app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/notes.html"));
 });
-// app.get("/notes", (req, res) => {
-//   res.sendFile(path.join(__dirname, "./public/notes.html"));
-// });
+
+app.get("/", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
+
 app.get("/api/notes", (req, res) => {
-    fs.readFile("/db/db.json", "utf-8", (err, notesData) => {
+    fs.readFile("./db/db.json", "utf-8", (err, notesData) => {
         if (err) {
           return res.status(500).json({ msg: "error reading db" });
         } else {
@@ -32,19 +34,19 @@ app.get("/api/notes", (req, res) => {
       });
 });
 app.post('/api/notes', (req,res)=>{
-    fs.readFile("/db/db.json","utf-8",(err,data)=>{
+    fs.readFile("./db/db.json","utf-8",(err,data)=>{
         if(err){
             return res.status(500).json({msg:"error reading db"})
         } else {
             const dataArr = JSON.parse(data);
             const newNote = {
-                id:uuid.v4(),
+                id:generateRandomNumber(),
                 title:req.body.title,
                 text:req.body.text
             }
             console.log(newNote)
             dataArr.push(newNote)
-           fs.writeFile("/db/db.json",JSON.stringify(dataArr,null,4),(err)=>{
+           fs.writeFile("./db/db.json",JSON.stringify(dataArr,null,4),(err)=>{
             if(err){
                 return res.status(500).json({msg:"error writing db"})
             } else {
@@ -56,5 +58,5 @@ app.post('/api/notes', (req,res)=>{
 })
 
 app.listen(PORT, () =>
-  console.log(`Example app listening at http://localhost:${PORT}`)
+  console.log(`Listening at http://localhost:${PORT}`)
 );
