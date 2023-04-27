@@ -1,1 +1,21 @@
-[{"title":"Test Title","text":"Test text"},{"id":"c9cb5eae-9b77-461e-ba0a-ec4e57f9e275","title":"My Notes","text":"The best way to take notes are to record them and play them back"},{"id":3138,"title":"New Note","text":"Trying out a new rand num"},{"id":6700,"title":"Test #3","text":"This better finally work"}]
+[
+    {
+        "title": "Test Title",
+        "text": "Test text"
+    },
+    {
+        "id": "6848",
+        "title": "Config Heroku",
+        "text": "make sure to add \"start\" : \"node index.js\" to the scripts"
+    },
+    {
+        "id": "f6e0",
+        "title": "Server",
+        "text": "PORT - process.env.PORT || 3000;"
+    },
+    {
+        "id": "cc79",
+        "title": "Init Heroku",
+        "text": "npm start gets you going "
+    }
+]
