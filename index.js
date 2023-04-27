@@ -23,9 +23,6 @@ app.get("/notes", (req, res) => {
   res.sendFile(path.join(__dirname, "./public/notes.html"));
 });
 
-app.get("/", (req, res) => {
-  res.sendFile(path.join(__dirname, "./public/index.html"));
-});
 
 app.get("/api/notes", (req, res) => {
   fs.readFile("./db/db.json", "utf-8", (err, notesData) => {
@@ -62,32 +59,35 @@ app.post("/api/notes", (req, res) => {
 });
 
 app.delete("/api/notes/:id", (req, res) => {
-    fs.readFile("./db/db.json", "utf-8", (err, data) => {
-      if (err) {
-        return res.status(500).json({ msg: "error reading db" });
+  fs.readFile("./db/db.json", "utf-8", (err, data) => {
+    if (err) {
+      return res.status(500).json({ msg: "error reading db" });
+    } else {
+      const notes = JSON.parse(data);
+      const noteID = req.params.id;
+      const noteIndex = notes.findIndex((note) => note.id == noteID);
+      if (noteIndex !== -1) {
+        notes.splice(noteIndex, 1);
+        fs.writeFile("./db/db.json", JSON.stringify(notes, null, 4), (err) => {
+          if (err) {
+            return res.status(500).json({ msg: "error writing db" });
+          } else {
+            return res.json({
+              msg: "note deleted successfully",
+            });
+          }
+        });
       } else {
-        const notes = JSON.parse(data);
-        const noteID = req.params.id;
-        const noteIndex = notes.findIndex((note) => note.id == noteID);
-        if (noteIndex !== -1) {
-          notes.splice(noteIndex, 1);
-          fs.writeFile("./db/db.json", JSON.stringify(notes, null, 4), (err) => {
-            if (err) {
-              return res.status(500).json({ msg: "error writing db" });
-            } else {
-              return res.json({
-                msg: "note deleted successfully",
-              });
-            }
-          });
-        } else {
-          return res.status(404).json({
-            msg: "no such note!",
-          });
-        }
+        return res.status(404).json({
+          msg: "no such note!",
+        });
       }
-    });
+    }
   });
-  
+});
+
+app.get("*", (req, res) => {
+  res.sendFile(path.join(__dirname, "./public/index.html"));
+});
 
 app.listen(PORT, () => console.log(`Listening at http://localhost:${PORT}`));
